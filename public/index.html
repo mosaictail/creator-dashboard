@@ -3,55 +3,164 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light" />
   <title>短视频运营数据看板</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Helvetica Neue", Arial, sans-serif;
-      background: #f5f5f7;
-      color: #1d1d1f;
-    }
-    main {
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      padding: 48px 24px;
-      text-align: center;
-    }
-    .card {
-      max-width: 760px;
-      background: rgba(255,255,255,0.82);
-      border: 1px solid rgba(0,0,0,0.06);
-      border-radius: 32px;
-      padding: 64px 48px;
-      box-shadow: 0 24px 80px rgba(0,0,0,0.08);
-    }
-    h1 {
-      font-size: clamp(40px, 7vw, 80px);
-      line-height: 1.05;
-      letter-spacing: -0.06em;
-      margin: 0 0 20px;
-    }
-    p {
-      font-size: 20px;
-      line-height: 1.6;
-      color: #6e6e73;
-      margin: 0;
-    }
-    .status {
-      margin-top: 32px;
-      font-size: 14px;
-      color: #86868b;
-    }
-  </style>
+  <link rel="stylesheet" href="./assets/styles.css" />
 </head>
 <body>
+  <header class="hero shell">
+    <div class="hero__meta">Creator Performance Dashboard</div>
+    <h1>短视频运营数据看板</h1>
+    <p>抖音 × 快手账号与视频表现追踪</p>
+    <dl class="hero__facts" aria-label="数据概况">
+      <div>
+        <dt>最后更新时间</dt>
+        <dd id="last-updated">N/A</dd>
+      </div>
+      <div>
+        <dt>数据覆盖周期</dt>
+        <dd id="data-period">N/A</dd>
+      </div>
+      <div>
+        <dt>固定网址</dt>
+        <dd><a href="https://creator-dashboard.rubychoustar.workers.dev">creator-dashboard.rubychoustar.workers.dev</a></dd>
+      </div>
+    </dl>
+  </header>
+
   <main>
-    <section class="card">
-      <h1>短视频运营数据看板</h1>
-      <p>抖音 × 快手账号与视频表现追踪</p>
-      <div class="status">项目已初始化，等待接入 Excel 数据。</div>
+    <section class="section section--overview">
+      <div class="shell">
+        <div class="section__heading">
+          <p>核心概览</p>
+          <h2>平台表现，一眼看清。</h2>
+        </div>
+        <div id="overview-grid" class="overview-grid" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="shell">
+        <div class="section__heading">
+          <p>平台对比</p>
+          <h2>抖音 vs 快手</h2>
+        </div>
+        <div class="comparison">
+          <div id="comparison-bars" class="comparison__bars"></div>
+          <div class="comparison__chart">
+            <svg id="radar-chart" viewBox="0 0 520 360" role="img" aria-label="平台核心指标对比图"></svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--soft">
+      <div class="shell">
+        <div class="section__heading">
+          <p>趋势</p>
+          <h2>按发布时间聚合的内容走势</h2>
+        </div>
+        <div id="trend-empty" class="empty-state" hidden>当前为单次数据快照，暂无趋势。</div>
+        <div class="trend">
+          <svg id="trend-chart" viewBox="0 0 980 360" role="img" aria-label="视频数据趋势图"></svg>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="shell">
+        <div class="section__heading">
+          <p>视频排行榜</p>
+          <h2>值得优先复盘的内容。</h2>
+        </div>
+        <div class="tabs" role="tablist" aria-label="排行榜切换">
+          <button type="button" class="tab is-active" data-rank="playCount">播放量 Top 10</button>
+          <button type="button" class="tab" data-rank="engagementRate">互动率 Top 10</button>
+          <button type="button" class="tab" data-rank="newFollowers">涨粉 Top 10</button>
+          <button type="button" class="tab" data-rank="favoriteCount">收藏 Top 10</button>
+          <button type="button" class="tab" data-rank="shareCount">分享 Top 10</button>
+        </div>
+        <div id="ranking-list" class="ranking-list"></div>
+      </div>
+    </section>
+
+    <section class="section section--soft">
+      <div class="shell">
+        <div class="section__heading">
+          <p>视频明细</p>
+          <h2>筛选、搜索、排序。</h2>
+        </div>
+        <div class="toolbar" aria-label="视频筛选">
+          <label>
+            平台
+            <select id="platform-filter"></select>
+          </label>
+          <label>
+            账号
+            <select id="account-filter"></select>
+          </label>
+          <label>
+            排序
+            <select id="sort-select">
+              <option value="playCount">播放量</option>
+              <option value="engagementRate">互动率</option>
+              <option value="publishTime">发布时间</option>
+            </select>
+          </label>
+          <label class="toolbar__search">
+            搜索
+            <input id="search-input" type="search" placeholder="输入视频标题" />
+          </label>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>平台</th>
+                <th>账号</th>
+                <th>视频标题</th>
+                <th>发布时间</th>
+                <th>播放/曝光</th>
+                <th>点赞</th>
+                <th>评论</th>
+                <th>分享</th>
+                <th>收藏</th>
+                <th>完播率</th>
+                <th>平均观看</th>
+                <th>新增粉丝</th>
+                <th>主页访问</th>
+                <th>互动率</th>
+                <th>涨粉转化</th>
+                <th>流量来源</th>
+              </tr>
+            </thead>
+            <tbody id="video-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="shell">
+        <div class="section__heading">
+          <p>运营洞察</p>
+          <h2>少一点解释，多一点动作。</h2>
+        </div>
+        <div id="insights" class="insights"></div>
+      </div>
+    </section>
+
+    <section class="section section--notes">
+      <div class="shell">
+        <div class="section__heading">
+          <p>数据说明</p>
+          <h2>本次更新记录</h2>
+        </div>
+        <div id="data-notes" class="notes-grid"></div>
+      </div>
     </section>
   </main>
+
+  <script src="./assets/app.js" defer></script>
 </body>
 </html>
