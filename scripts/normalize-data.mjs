@@ -4,7 +4,9 @@ import { fileURLToPath } from "node:url";
 import {
   FIXED_PRODUCTION_URL,
   HISTORY_DIRECTORY,
+  LEGACY_PRODUCTION_URL,
   NORMALIZED_DATA_PATH,
+  OFFICIAL_PRODUCTION_URL,
   SOURCE_WORKBOOK_PATH,
 } from "../src/lib/config.js";
 import { parseWorkbook } from "../src/lib/parseWorkbook.js";
@@ -74,6 +76,8 @@ const payload = {
   meta: {
     sourceFile: path.basename(workbookPath),
     fixedUrl: FIXED_PRODUCTION_URL,
+    officialUrl: OFFICIAL_PRODUCTION_URL,
+    legacyUrl: LEGACY_PRODUCTION_URL,
     generatedAt,
     publishPeriod: period,
     sheetNames: parsed.sheetNames,
@@ -84,7 +88,7 @@ const payload = {
     matchingPolicy: dashboard.matchingPolicy,
     notes: [
       "趋势图按发布时间聚合，不代表逐日账号监测。",
-      "CPM = spend / plays * 1000；CPE = spend / interactions。",
+      "CPM = 投流消耗 / 播放量 * 1000；CPE = 投流消耗 / 互动量。",
       "当消耗小于等于 0 时，CPM 与 CPE 统一显示为“—”。",
     ],
   },
@@ -103,4 +107,3 @@ const historyPath = resolveRepoPath(path.join(HISTORY_DIRECTORY, `${timestamp}-$
 await writeJson(historyPath, payload);
 
 console.log(JSON.stringify(payload.meta, null, 2));
-

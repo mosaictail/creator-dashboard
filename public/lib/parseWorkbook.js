@@ -1,5 +1,5 @@
 import XLSX from "xlsx";
-import { PLATFORM_RULES } from "./config.js";
+import { CANONICAL_FIELD_LABELS, PLATFORM_RULES } from "./config.js";
 
 const HEADER_MATCH_KEYS = ["标题", "作品名称", "作品", "发布时间", "播放量", "完播率"];
 
@@ -89,7 +89,7 @@ function buildColumnMap(headers, platform) {
       mapping[field] = columnIndex;
       const header = headers[columnIndex];
       if (String(header) !== field) {
-        mappingNotes.push(`${platform}：${header} -> ${field}`);
+        mappingNotes.push(`${platform}：${header} -> ${CANONICAL_FIELD_LABELS[field] ?? field}`);
       }
     }
   }
@@ -135,4 +135,3 @@ export function parseWorkbook(filePath) {
     sheets,
   };
 }
-

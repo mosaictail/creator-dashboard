@@ -51,16 +51,16 @@ function rankingList(title, rows, formatter) {
       <div class="section-kicker">榜单</div>
       <h3>${title}</h3>
       <div class="ranking-card__list">
-        ${rows.map((row, index) => `
+        ${rows.length ? rows.map((row, index) => `
           <div class="ranking-row">
             <div class="ranking-row__index">${index + 1}</div>
             <div class="ranking-row__content">
               <strong>${escapeHtml(row.title)}</strong>
-              <span>${escapeHtml(row.platform)} · ${escapeHtml(formatDateTime(row.publishAt))}</span>
+              <span>${escapeHtml(formatDateTime(row.publishAt))} · ${escapeHtml(row.embedStrength ?? "—")}</span>
             </div>
             <div class="ranking-row__value">${formatter(row.value)}</div>
           </div>
-        `).join("")}
+        `).join("") : `<div class="empty-card">暂无有效数据。</div>`}
       </div>
     </article>
   `;
@@ -84,7 +84,6 @@ function embedRows(rows) {
 function tableRows(rows) {
   return rows.map((row) => `
     <tr>
-      <td><span class="platform-chip platform-chip--inline">${escapeHtml(row.platform)}</span></td>
       <td>${escapeHtml(formatDateTime(row.publishAt))}</td>
       <td class="title-cell">${escapeHtml(row.title)}</td>
       <td>${escapeHtml(row.embedStrength ?? "—")}</td>
@@ -96,6 +95,59 @@ function tableRows(rows) {
       <td>${formatCurrency(row.cpe, 2)}</td>
     </tr>
   `).join("");
+}
+
+function platformContentSections(groups) {
+  return groups.map((group) => `
+    <article class="platform-section">
+      <div class="platform-section__head">
+        <span class="platform-chip">${escapeHtml(group.platform)}</span>
+        <h3>${escapeHtml(group.platform)}内容表现</h3>
+      </div>
+      <div class="card table-card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>发布时间</th>
+                <th>作品名称</th>
+                <th>植入强度</th>
+                <th>播放量</th>
+                <th>互动量</th>
+                <th>净增粉</th>
+                <th>投流消耗</th>
+                <th>CPM</th>
+                <th>CPE</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${group.rows.length ? tableRows(group.rows) : `<tr><td colspan="9">暂无有效内容记录。</td></tr>`}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </article>
+  `).join("");
+}
+
+function platformRankingSections(rankingsByPlatform) {
+  return ["抖音", "快手"].map((platform) => {
+    const rankings = rankingsByPlatform[platform] ?? {};
+    return `
+      <article class="platform-section">
+        <div class="platform-section__head">
+          <span class="platform-chip">${platform}</span>
+          <h3>${platform}榜单区</h3>
+        </div>
+        <div class="ranking-grid ranking-grid--platform">
+          ${rankingList("播放 TOP5", rankings.plays ?? [], (value) => formatCompactNumber(value, 2))}
+          ${rankingList("互动 TOP5", rankings.interactions ?? [], (value) => formatCompactNumber(value, 2))}
+          ${rankingList("低 CPM TOP5", rankings.lowCpm ?? [], (value) => formatCurrency(value, 2))}
+          ${rankingList("低 CPE TOP5", rankings.lowCpe ?? [], (value) => formatCurrency(value, 2))}
+        </div>
+      </article>
+    `;
+  }).join("");
 }
 
 export function renderDashboard(root, payload) {
@@ -111,8 +163,12 @@ export function renderDashboard(root, payload) {
         </div>
         <div class="hero__facts">
           <div class="fact-card">
-            <span>固定生产地址</span>
+            <span>官方生产地址</span>
             <strong>${escapeHtml(meta.fixedUrl)}</strong>
+          </div>
+          <div class="fact-card">
+            <span>保留旧入口</span>
+            <strong>${escapeHtml(meta.legacyUrl ?? "—")}</strong>
           </div>
           <div class="fact-card">
             <span>数据周期</span>
@@ -181,32 +237,12 @@ export function renderDashboard(root, payload) {
         <div class="section-head">
           <div>
             <div class="section-kicker">内容表现区</div>
-            <h2>当前样本不做跨平台强行对齐，按真实平台记录展示。</h2>
+            <h2>分平台看内容表现，避免把不同平台口径混在一起。</h2>
           </div>
           <div class="note-pill">${escapeHtml(dashboard.matchingPolicy.reason)}</div>
         </div>
-        <div class="card table-card">
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>平台</th>
-                  <th>发布时间</th>
-                  <th>作品名称</th>
-                  <th>植入强度</th>
-                  <th>播放量</th>
-                  <th>互动量</th>
-                  <th>净增粉</th>
-                  <th>投流消耗</th>
-                  <th>CPM</th>
-                  <th>CPE</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${tableRows(dashboard.contentTable)}
-              </tbody>
-            </table>
-          </div>
+        <div class="platform-stack">
+          ${platformContentSections(dashboard.platformContentTables)}
         </div>
       </section>
 
@@ -214,14 +250,11 @@ export function renderDashboard(root, payload) {
         <div class="section-head">
           <div>
             <div class="section-kicker">榜单区</div>
-            <h2>先复盘头部，再清理低效投放。</h2>
+            <h2>榜单按平台拆开，效率排序才更可读。</h2>
           </div>
         </div>
-        <div class="ranking-grid">
-          ${rankingList("播放 TOP5", dashboard.rankings.plays, (value) => formatCompactNumber(value, 2))}
-          ${rankingList("互动 TOP5", dashboard.rankings.interactions, (value) => formatCompactNumber(value, 2))}
-          ${rankingList("低 CPM TOP5", dashboard.rankings.lowCpm, (value) => formatCurrency(value, 2))}
-          ${rankingList("低 CPE TOP5", dashboard.rankings.lowCpe, (value) => formatCurrency(value, 2))}
+        <div class="platform-stack">
+          ${platformRankingSections(dashboard.platformRankings)}
         </div>
       </section>
 
@@ -259,7 +292,7 @@ export function renderDashboard(root, payload) {
         <div class="section-head">
           <div>
             <div class="section-kicker">结论区</div>
-            <h2>本周期建议只保留三条结论，方便向上汇报。</h2>
+            <h2>本周期只保留三条可行动观察。</h2>
           </div>
         </div>
         <div class="insight-grid">
@@ -297,4 +330,3 @@ export function renderDashboard(root, payload) {
     </div>
   `;
 }
-

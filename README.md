@@ -1,6 +1,10 @@
 # creator-dashboard
 
-用于抖音与快手账号的固定生产数据看板，固定生产地址必须保持为：
+用于抖音与快手账号的固定生产数据看板，官方生产地址必须保持为：
+
+`https://dashboard.310work.com`
+
+旧入口如果仍在当前 Cloudflare 拓扑中可用，需要继续保留：
 
 `https://creator-dashboard.rubychoustar.workers.dev`
 
@@ -32,6 +36,8 @@ public/               # 构建产物，供现有 Cloudflare 项目继续发布
 - 抖音 `发布时间` 按 Excel serial 转换为 ISO 时间。
 - 快手 `发布时间` 按字符串时间解析。
 - 快手重复 `完播率` 列默认取后一个列位作为规范字段，并在标准化结果里保留映射说明。
+- 互动口径分平台计算：抖音为点赞、评论、分享、收藏；快手为点赞、评论、收藏。
+- CPM 与 CPE 统一按代码配置计算，源表 CPM/CPE 只作为参考字段保留。
 
 ## 周更方式
 
@@ -69,7 +75,7 @@ npm run normalize-data -- /path/to/本周数据.xlsx
 npm run build
 ```
 
-保留现有 Cloudflare 项目与现有生产 URL 的前提下，可用现有 Cloudflare 工具尝试直接发布到同名项目：
+保留现有 Cloudflare 项目、官方地址和旧入口的前提下，可用现有 Cloudflare 工具发布到同名项目：
 
 ```bash
 npm run deploy
@@ -81,4 +87,4 @@ npm run deploy
 WRANGLER_HOME=.wrangler npx --cache .npm-cache wrangler@4 login
 ```
 
-如果当前生产链路仍然依赖 Git 集成、Worker 代理或既有映射，请继续沿用原拓扑，不要新建 Cloudflare 项目，也不要改动固定生产地址。
+如果当前生产链路仍然依赖 Git 集成、Worker 静态资产、Worker 代理或既有映射，请继续沿用原拓扑，不要新建 Cloudflare 项目，也不要改动官方地址或旧入口。

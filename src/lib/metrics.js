@@ -177,6 +177,37 @@ function buildContentTable(records) {
   }));
 }
 
+function groupContentByPlatform(records) {
+  return ["抖音", "快手"].map((platform) => ({
+    platform,
+    rows: buildContentTable(records.filter((record) => record.platform === platform)),
+  }));
+}
+
+function buildRankingsByPlatform(records) {
+  return Object.fromEntries(["抖音", "快手"].map((platform) => {
+    const platformRecords = records.filter((record) => record.platform === platform);
+    return [platform, {
+      plays: rankingItems(platformRecords, "plays"),
+      interactions: rankingItems(platformRecords, "computedInteractions"),
+      lowCpm: rankingItems(
+        platformRecords,
+        "computedCpm",
+        "asc",
+        5,
+        (record) => record.spend > 0 && record.plays > 0 && Number.isFinite(record.computedCpm),
+      ),
+      lowCpe: rankingItems(
+        platformRecords,
+        "computedCpe",
+        "asc",
+        5,
+        (record) => record.spend > 0 && record.computedInteractions > 0 && Number.isFinite(record.computedCpe),
+      ),
+    }];
+  }));
+}
+
 function publishCountSummary(platformSummaries) {
   return platformSummaries.map((item) => `${item.platform} ${item.publishCount} 条`).join(" / ");
 }
@@ -235,6 +266,7 @@ export function buildDashboardMetrics(normalized) {
         (record) => record.spend > 0 && record.computedInteractions > 0 && Number.isFinite(record.computedCpe),
       ),
     },
+    platformRankings: buildRankingsByPlatform(normalized.records),
     embedAnalysis: buildEmbedAnalysis(normalized.records).map((item) => ({
       ...item,
       avgPlays: round(item.avgPlays, 2),
@@ -245,7 +277,7 @@ export function buildDashboardMetrics(normalized) {
       avgCpe: round(item.avgCpe, 6),
     })),
     contentTable: buildContentTable(normalized.records),
+    platformContentTables: groupContentByPlatform(normalized.records),
     matchingPolicy: MATCHING_POLICY,
   };
 }
-

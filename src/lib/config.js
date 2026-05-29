@@ -1,4 +1,6 @@
-export const FIXED_PRODUCTION_URL = "https://creator-dashboard.rubychoustar.workers.dev";
+export const OFFICIAL_PRODUCTION_URL = "https://dashboard.310work.com";
+export const LEGACY_PRODUCTION_URL = "https://creator-dashboard.rubychoustar.workers.dev";
+export const FIXED_PRODUCTION_URL = OFFICIAL_PRODUCTION_URL;
 export const SOURCE_WORKBOOK_PATH = "data/source/latest.xlsx";
 export const NORMALIZED_DATA_PATH = "data/normalized/latest.json";
 export const HISTORY_DIRECTORY = "data/normalized/history";
@@ -75,10 +77,31 @@ export const PLATFORM_RULES = {
   },
 };
 
+export const CANONICAL_FIELD_LABELS = {
+  embedStrength: "植入强度",
+  title: "作品名称",
+  publishAt: "发布时间",
+  genre: "体裁",
+  reviewStatus: "审核状态",
+  plays: "播放量",
+  completeRate: "完播率",
+  completeRate5s: "5秒完播率",
+  bounceRate2s: "2秒跳出率",
+  avgWatchTime: "平均播放时长",
+  likes: "点赞量",
+  shares: "分享量",
+  comments: "评论量",
+  favorites: "收藏量",
+  profileVisits: "主页访问量",
+  followerGain: "粉丝增量",
+  spend: "投流消耗",
+  sourceCpm: "源表 CPM",
+  sourceCpe: "源表 CPE",
+};
+
 export const EMBED_STRENGTH_ORDER = ["弱植入", "中植入", "强植入"];
 
 export const MATCHING_POLICY = {
   enabled: false,
   reason: "当前两平台标题与记录数不稳定，不做强制一一匹配，统一使用平台分开展示。",
 };
-
