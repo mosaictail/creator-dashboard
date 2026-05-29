@@ -60,6 +60,8 @@ npm run build
 - `data/normalized/history/*.json`
 - `public/*`
 
+其中 `data/normalized/latest.json` 保留完整标准化数据；线上 `public/data/latest.json` 只包含页面渲染所需的 `meta` 与 `dashboard`，避免发布不必要的原始明细。
+
 ## 构建与部署
 
 安装依赖：

@@ -31,7 +31,13 @@ async function copyDirectory(source, destination) {
 await removeDirectory(publicDir);
 await copyDirectory(srcDir, publicDir);
 await fs.mkdir(dataDir, { recursive: true });
-await fs.copyFile(path.join(repoRoot, NORMALIZED_DATA_PATH), path.join(dataDir, "latest.json"));
+
+const normalizedPayload = JSON.parse(await fs.readFile(path.join(repoRoot, NORMALIZED_DATA_PATH), "utf8"));
+const publicPayload = {
+  meta: normalizedPayload.meta,
+  dashboard: normalizedPayload.dashboard,
+};
+
+await fs.writeFile(path.join(dataDir, "latest.json"), `${JSON.stringify(publicPayload)}\n`, "utf8");
 
 console.log(`Built static site into ${publicDir}`);
-
