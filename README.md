@@ -77,7 +77,7 @@ npm run normalize-data -- /path/to/本周数据.xlsx
 npm run build
 ```
 
-保留现有 Cloudflare 项目、官方地址和旧入口的前提下，可用现有 Cloudflare 工具发布到同名项目：
+保留现有 Cloudflare Worker 静态资产项目、官方地址和旧入口的前提下，可用现有 Cloudflare 工具发布到同名 Worker：
 
 ```bash
 npm run deploy

@@ -6,7 +6,7 @@
   "scripts": {
     "normalize-data": "node scripts/normalize-data.mjs",
     "build": "node scripts/build.mjs",
-    "deploy": "WRANGLER_HOME=.wrangler npm run build && WRANGLER_HOME=.wrangler npx --cache .npm-cache wrangler@4 pages deploy public --project-name creator-dashboard",
+    "deploy": "WRANGLER_HOME=.wrangler npm run build && WRANGLER_HOME=.wrangler npx --cache .npm-cache wrangler@4 deploy",
     "cf:whoami": "WRANGLER_HOME=.wrangler npx --cache .npm-cache wrangler@4 whoami"
   },
   "dependencies": {
